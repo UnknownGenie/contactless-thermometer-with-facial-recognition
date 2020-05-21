@@ -7,9 +7,90 @@ Created on Mon May 18 12:25:52 2020
 
 import sqlite3
 
-conn = sqlite3.connect('data.db')
 
-c = conn.cursor()
-
-c.execute('''CREATE TABLE stocks
-             (date text, trans text, symbol text, qty real, price real)''')
+class db_ops():
+    def __init__(self, path):
+        try:
+            
+            self.conn = sqlite3.connect(path)
+            self.c = self.conn.cursor()
+            
+            print("INFO: databse connection success")
+            
+            self.execute('SELECT SQLITE_VERSION()')
+            data = self.c.fetchone()
+            print('SQLite version:', data[0])
+            
+            self.execute('''CREATE TABLE IF NOT EXISTS train (
+                            file TEXT NOT NULL,
+                           	persongroup TEXT NOT NULL,
+                         	person TEXT NOT NULL,
+                            done INT NOT NULL DEFAULT 0
+                        )''')
+            
+            self.execute('''CREATE TABLE IF NOT EXISTS detect (
+                         	file TEXT NOT NULL,
+                           	persongroup TEXT NOT NULL,
+                         	done INT NOT NULL DEFAULT 0
+                        )''')
+            
+            self.execute('''CREATE TABLE IF NOT EXISTS attendance (
+                            appeared_at TEXT NOT NULL,        	
+                            azureid TEXT NOT NULL,
+                           	name TEXT NOT NULL,
+                            temperature REAL NOT NULL,
+                        	file TEXT NOT NULL
+                        )''')
+            
+            self.execute('''CREATE TABLE IF NOT EXISTS person (
+                         	name TEXT NOT NULL,
+                           	azureid TEXT NOT NULL,
+                         	contact TEXT,
+                            persongroup TEXT NOT NULL
+                        )''')
+            print("Tables created/modiified")
+                                 
+        except sqlite3.Error as error:
+            print("ERROR: ", error)
+    
+    def update(self, table, vals, expression=None):
+        query =  "UPDATE {} SET {} WHERE {};".format(table, vals,
+                                                    expression)
+        self.execute(query)
+        self.commit()
+        print("INFO: Updated {}".format(table))
+    def insert(self, table, cols, vals):
+        query = 'INSERT INTO {} {} VALUES {};'.format(table,
+                                                     str(cols),
+                                                     str(vals))
+        self.execute(query)
+        self.commit()
+        print("INFO: Inserted in {}".format(table))
+    def get(self, cols, table, expression=None, fetch = 'all'):
+        if expression:
+            query = 'SELECT {} FROM {} WHERE {};'.format(cols, table, 
+                                                        expression)
+        else:
+            query = 'SELECT {} FROM {}'.format(cols, table)
+        self.execute(query)
+        if fetch == 'all': return self.c.fetchall()
+        elif fetch == 'one': return self.c.fetchone()
+        
+    def close(self):
+        self.conn.close()
+    
+    def commit(self):
+        self.conn.commit()
+    
+    def execute(self, query):
+        try:
+            self.c.execute(query)
+        except sqlite3.Error as e:
+            print("QUERY:{}".format(query))
+            print("ERROR: error occured at above query: {}".format(e))
+        
+        
+        
+        
+        
+        

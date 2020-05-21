@@ -1,0 +1,4 @@
+train -> TEXT file, TEXT group, TEXT person, INTEGER done
+detect -> TEXT file, TEXT group, INTEGER done
+attendance -> TEXT appeared_at, TEXT person_AzureID, TEXT person_Name, REAL temperature, TEXT file
+person -> TEXT Name, TEXT AzureID, TEXT Contact, TEXT group
