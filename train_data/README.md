@@ -1,4 +1,4 @@
-# contactless-thermometer-with-facial-recognition
+# directory structore for train data
 
 This directory will contain all training data. structure should be:
 
