@@ -87,8 +87,8 @@ class face_client():
         names = []
         for face in faces:
             face_ids.append(face.face_id)
-        results = self.client.face.identify(face_ids, persongroup)
         print('INFO: Identifying faces in {}'.format(path.split(os.sep)[-1]))
+        results = self.client.face.identify(face_ids, persongroup)
         if not results:
             print('INFO: No person identified in the person group for faces from {}.'.format(path))
         for person, face in zip(results, faces):

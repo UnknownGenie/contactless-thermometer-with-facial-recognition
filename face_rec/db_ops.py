@@ -12,7 +12,7 @@ class db_ops():
     def __init__(self, path):
         try:
             
-            self.conn = sqlite3.connect(path)
+            self.conn = sqlite3.connect(path, check_same_thread=False)
             self.c = self.conn.cursor()
             
             print("INFO: databse connection success")
