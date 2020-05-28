@@ -1,4 +1,5 @@
-# contactless-thermometer-with-facial-recognition
+# test_data directory structure
+
 
 Contains test images for each person group under seperate directory
 
