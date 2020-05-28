@@ -6,7 +6,7 @@ RaspberryPi is used to process and generate API calls.
 
 Temperature sensor is used to determine temeprature.
 
-A web interface is provided to interact with RaspberryPi./n
+A web interface is provided to interact with RaspberryPi.
 
 # Usage
 1. git clone https://github.com/UnknownGenie/contactless-thermometer-with-facial-recognition
