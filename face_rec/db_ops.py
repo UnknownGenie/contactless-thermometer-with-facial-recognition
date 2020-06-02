@@ -44,9 +44,10 @@ class db_ops():
             
             self.execute('''CREATE TABLE IF NOT EXISTS person (
                          	name TEXT NOT NULL,
-                           	azureid TEXT NOT NULL,
+                           	azureid TEXT,
                          	contact TEXT,
-                            persongroup TEXT NOT NULL
+                            persongroup TEXT,
+                            CONSTRAINT id UNIQUE (azureid)
                         )''')
             print("Tables created/modiified")
                                  
@@ -87,7 +88,7 @@ class db_ops():
             self.c.execute(query)
         except sqlite3.Error as e:
             print("QUERY:{}".format(query))
-            print("ERROR: error occured at above query: {}".format(e))
+            print("ERROR: query failed: {}".format(e))
         
         
         

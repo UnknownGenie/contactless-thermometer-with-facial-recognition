@@ -64,7 +64,7 @@ class face_client():
             if (training_status.status is TrainingStatusType.succeeded):
                 break
             elif (training_status.status is TrainingStatusType.failed):
-                sys.exit('Training the person group has failed.')
+                print('ERROR: Training the person group has failed., Try Again...')
             time.sleep(5)
             
     def test_metadeta_from_dir(self, test_path, DB):
@@ -82,23 +82,34 @@ class face_client():
     def identify(self, path, persongroup, id2name):
         image = open(path, 'r+b')
         face_ids = []
-        faces = self.client.face.detect_with_stream(image)
         azureids = []
         names = []
+        file = path.split(os.sep)[-1]
+        try: 
+            faces = self.client.face.detect_with_stream(image)
+            if not faces:
+                raise Exception('No face detected from image {}'.format(file))
+        except Exception as e: 
+            print("ERROR: {}".format(e))
+            return "failed", "failed"
+         
         for face in faces:
             face_ids.append(face.face_id)
-        print('INFO: Identifying faces in {}'.format(path.split(os.sep)[-1]))
+        print('INFO: Identifying faces in {}'.format(file))
         results = self.client.face.identify(face_ids, persongroup)
-        if not results:
-            print('INFO: No person identified in the person group for faces from {}.'.format(path))
+        not_found = 0
         for person, face in zip(results, faces):
-            if len(person.candidates) != 0:
+            if person.candidates:
                 azureid = person.candidates[0].person_id
                 name = id2name[azureid]
                 confidence = person.candidates[0].confidence
                 print('INFO: {} is identified with {:.2f} score'.format(name, confidence))
                 azureids.append(azureid)
                 names.append(name)
+            else:
+                not_found += 1
+        if len(results) == not_found:
+            print('INFO: No person identified in the person group for faces from {}.'.format(file))
         return azureids, names
     def train_metadeta_from_dir(self, train_path, DB):
         groups = self.client.person_group.list()
@@ -131,6 +142,12 @@ class face_client():
                 else:
                     idx = person_names.index(person)
                     person_object = persons[idx]
+                    
+                    cols = '(name, azureid, persongroup)'
+                    name = person_object.name
+                    azure_id = person_object.person_id
+                    vals = "('{}','{}','{}')".format(name, azure_id, persongroup)
+                    DB.insert('person', cols, vals)
                 
                 
                 for image in os.listdir(person_path):

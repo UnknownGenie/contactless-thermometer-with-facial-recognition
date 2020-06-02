@@ -48,6 +48,8 @@ def identify(test_path, client, DB):
     cols = '(appeared_at, azureid, name, temperature, file)' 
     for image_path, persongroup in to_detect:
         azureids, names = client.identify(image_path, persongroup, id2name)
+        if not isinstance(azureids, list):
+            continue    
         if len(azureids) > 0:
             for azureid, name in zip(azureids, names):
                 vals = "('{}','{}','{}',{},'{}')".format(creation_date(image_path),
@@ -56,7 +58,6 @@ def identify(test_path, client, DB):
                 DB.insert('attendance', cols, vals)
                 time.sleep(0.1)
         DB.update('detect', 'done=1', "file='{}'".format(image_path))
-        
 def init_Observer(path):
     event_handler = Handler() 
     observer = Observer() 
@@ -68,12 +69,26 @@ def stop_Observer(observer):
     observer.stop() 
     observer.join() 
     
-def update_db(handler, DB):
+def update_db(handler, DB, client):
     queue = handler.queue
     while len(queue) > 0:
         query = handler.queue.pop(0)
-        table, cols, vals = query
-        DB.insert(table, cols, vals)
+        if len(query) == 2:
+            person, persongroup = query[0], query[1]
+            persons = DB.get('name', 'person')
+            if not person in persons:
+                try:
+                    person_object = client.add_person(persongroup, person)
+                    azure_id = person_object.person_id
+                    name = person_object.name
+                    cols = '(name, azureid, persongroup)'
+                    vals = "('{}','{}','{}')".format(name, azure_id, persongroup)
+                    DB.insert('person', cols, vals)
+                except Exception as e:
+                    print("ERROR: {}".format(e))
+        else:
+            table, cols, vals = query
+            DB.insert(table, cols, vals)
         
 def main():
     client = face_client(creds_path)
@@ -93,7 +108,7 @@ def main():
     try:
         while True:
             for handler in [handler_train, handler_test]:
-                update_db(handler, DB)
+                update_db(handler, DB, client)
                 time.sleep(0.2)
             train(client, DB)
             identify(test_path, client, DB)

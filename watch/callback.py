@@ -26,6 +26,7 @@ class Handler(watchdog.events.PatternMatchingEventHandler):
                 vals = "('{}','{}','{}')".format(image_path,
                                               persongroup, person)
                 self.queue.append(['train', cols, vals])
+                self.queue.append([person, persongroup])
             
             elif 'test_data' in event.src_path:
                 persongroup = parts[-2]
