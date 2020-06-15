@@ -66,8 +66,9 @@ def face_client(cred_path):
         sys.exit()
         
 
-def train(client, group):
+def train(client,group):
         client.person_group.train(group)
+        print("training...")
         while (True):
             training_status = client.person_group.get_training_status(group)
             if (training_status.status is TrainingStatusType.succeeded):
@@ -84,23 +85,24 @@ def check_add_train(creds_path, group, person, images):
     # Add group if not found    
     persongroup = group
     if not persongroup in group_names: 
-        add_group(persongroup)
+        add_group(client, persongroup)
     
     persons = client.person_group_person.list(persongroup)
     person_names = [person.name for person in persons]
     # Add person if not found
     if not person in person_names: 
-        person_object = add_person(persongroup, person)
+        person_object = add_person(client, persongroup, person)
     else:
         idx = person_names.index(person)
         person_object = persons[idx]
     
     for image in images:
         if image.endswith('jpg'):
-            add_image(persongroup, person_object, image)
+            add_image(client, persongroup, person_object, image)
         else:
             print("Error: Please provide images with jpg format")
-    train(persongroup)
+    train(client, persongroup)
+    
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='''Adds group, person and image if not found. Trains as well. ''')
     parser.add_argument("id", help="ID of the client, this will be name of persongroup")
@@ -110,9 +112,10 @@ if __name__=='__main__':
                         default='creds.json')
     args = parser.parse_args()
     creds_path = args.k
+    creds_path = os.path.abspath(creds_path)
     group = args.id
     person = args.person
     images_path = args.images
     images = glob.glob(os.path.join(images_path, '*.jpg'))
-    # check_add_train(creds_path, group, person, images)
+    check_add_train(creds_path, group, person, images)
     print("Success")
