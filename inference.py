@@ -67,13 +67,10 @@ def run_inference(creds_path, persongroup, path):
     for person, face in zip(results, faces):
         if person.candidates:
             azureid = person.candidates[0].person_id
-            confidence = person.candidates[0].confidence
-            print('{} is identified with {:.2f} score'.format(azureid, confidence))
             azureids.append(azureid)
         else:
             not_found += 1
     if len(results) == not_found:
-        print('INFO: No person identified in the person group for faces from {}.'.format(file))
         sys.exit()
     return azureids
 
@@ -88,6 +85,4 @@ if __name__=='__main__':
     group = args.id
     image_path = args.image
     ids = run_inference(creds_path, group, image_path)
-    print("Success")
-    print("Identified these")
     print(ids)

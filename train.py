@@ -102,7 +102,7 @@ def check_add_train(creds_path, group, person, images):
         else:
             print("Error: Please provide images with jpg format")
     train(client, persongroup)
-    
+    return person_object.person_id  
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='''Adds group, person and image if not found. Trains as well. ''')
     parser.add_argument("id", help="ID of the client, this will be name of persongroup")
@@ -117,5 +117,5 @@ if __name__=='__main__':
     person = args.person
     images_path = args.images
     images = glob.glob(os.path.join(images_path, '*.jpg'))
-    check_add_train(creds_path, group, person, images)
-    print("Success")
+    id_for_person = check_add_train(creds_path, group, person, images)
+    print(id_for_person)
