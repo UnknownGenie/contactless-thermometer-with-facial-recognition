@@ -1,2 +1,8 @@
-azure-cognitiveservices-vision-face==0.4.0
+imutils==0.5.3
+msrest==0.6.13
+opencv_python==4.2.0.34
+keyboard==0.13.5
+requests==2.23.0
 watchdog==0.10.2
+azure_storage==0.37.0
+board==1.0
