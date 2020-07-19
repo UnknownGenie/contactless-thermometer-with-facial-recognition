@@ -40,7 +40,8 @@ def add_person(client, group, name):
     
 def add_group(client, group):
         try:
-            client.person_group.create(person_group_id=group, name=group)
+            client.person_group.create(person_group_id=group, name=group,
+                                       recognition_model='recognition_03')
         except Exception as e:
             print("Error occured while adding group")
             print("Error: {}".format(e))
@@ -68,22 +69,28 @@ def face_client(cred_path):
 
 def train(client,group):
         client.person_group.train(group)
-        print("training...")
+        print("training {}...".format(group))
+        s = time.time()
         while (True):
             training_status = client.person_group.get_training_status(group)
             if (training_status.status is TrainingStatusType.succeeded):
-                break
+                return True
             elif (training_status.status is TrainingStatusType.failed):
                 print('ERROR: Training failed., Try Again...')
+                print(training_status.message)
+                if time.time() - s > 10:
+                    return False
+            
             time.sleep(5)
-    
+        
 def check_add_train(creds_path, group, person, images):
     client = face_client(creds_path)
     
     groups = client.person_group.list()
     group_names = [group.name for group in groups]
-    # Add group if not found    
+    
     persongroup = group
+    # Add group if not found
     if not persongroup in group_names: 
         add_group(client, persongroup)
     
@@ -95,14 +102,18 @@ def check_add_train(creds_path, group, person, images):
     else:
         idx = person_names.index(person)
         person_object = persons[idx]
-    
+    if not images:
+        print("Training Images not found, kindly provide correct directory")
+        sys.exit()
     for image in images:
         if image.endswith('jpg'):
             add_image(client, persongroup, person_object, image)
         else:
             print("Error: Please provide images with jpg format")
-    train(client, persongroup)
-    return person_object.person_id  
+    if train(client, persongroup):
+        return person_object.person_id
+    else:
+        return "Failed"  
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='''Adds group, person and image if not found. Trains as well. ''')
     parser.add_argument("id", help="ID of the client, this will be name of persongroup")

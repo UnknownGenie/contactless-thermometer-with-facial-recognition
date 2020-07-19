@@ -25,10 +25,18 @@ def send_request(image, temperature, current_time, user_id, url):
     
     try:
         response = requests.post(url, data = request, files=file)
+        message = ''
+        try:
+            response_json = response.json()
+            data = response_json['data']
+            message = "\nMessage recieved: {}".format(data)
+        except Exception as e:
+            pass 
+        
         if response.status_code == 200:
-            return "Successfull with code: {}".format(response.status_code)
+            return "Successfull with code: {}".format(response.status_code)# + mesasge
         else:
-            return "failed with code: {}".format(response.status_code)
+            return "failed with code: {}".format(response.status_code)# + message
     except Exception as e:
         print(e)
         return "Failed due to excpetion"
@@ -44,7 +52,7 @@ if __name__ == '__main__':
     url = 'https://quiet-tundra-18558.herokuapp.com/api/v1/device'
     temperature_float = 27.7
     temperature_string = "{} C".format(temperature_float) # temperature foramtted as this 
-    user_id = "rada5eedf4c9518ee30004f2eba8" 
+    user_id = "rada5f0ec33c798af800044cb2d9" 
     
     # Get and format time
     epoch_time = int(time.time())

@@ -56,7 +56,7 @@ def get_proximity_pc():
         return False
             
 def get_temperature_pc():
-    if keyboard.is_pressed('d'):  # if key 'd' is pressed 
+    if keyboard.is_pressed('t'):  # if key 'd' is pressed 
         print('Pressed d!')
         return True, '96 F'
     else:
